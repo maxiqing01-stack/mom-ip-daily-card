@@ -1,0 +1,2255 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3ea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="拍摄卡">
+  <title>母婴 IP 今日拍摄卡</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f3ea;
+      --paper: #fffdf7;
+      --ink: #231f20;
+      --muted: #746d66;
+      --line: #ded6c9;
+      --brand: #1d766f;
+      --brand-2: #b24b4d;
+      --soft: #e9f3ef;
+      --done: #edf7e8;
+      --shadow: 0 12px 28px rgba(42, 31, 21, .08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 220px),
+        var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      width: min(100%, 480px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+    }
+
+    .top {
+      padding: 8px 2px 18px;
+    }
+
+    .switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin: 4px 0 16px;
+    }
+
+    .switch-button {
+      min-height: 50px;
+      padding: 10px 8px;
+      color: var(--muted);
+      background: #f8f6ef;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-weight: 800;
+    }
+
+    .switch-button.active {
+      color: #fff;
+      background: var(--brand);
+      border-color: var(--brand);
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    h1 {
+      margin: 6px 0 10px;
+      font-size: 30px;
+      line-height: 1.16;
+      letter-spacing: 0;
+    }
+
+    .goal {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .goal strong {
+      font-size: 20px;
+    }
+
+    .focus {
+      color: var(--brand-2);
+      font-size: 16px;
+    }
+
+    .step {
+      margin-top: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 16px;
+      color: var(--ink);
+      background: transparent;
+      text-align: left;
+    }
+
+    .step-title {
+      display: grid;
+      gap: 2px;
+    }
+
+    .step-title b {
+      font-size: 19px;
+    }
+
+    .step-title span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status {
+      flex: 0 0 auto;
+      min-width: 54px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .step.done .status {
+      color: var(--brand);
+      font-weight: 700;
+    }
+
+    .step-body {
+      display: none;
+      padding: 0 16px 16px;
+    }
+
+    .step.active .step-body {
+      display: block;
+    }
+
+    .chips {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .chip {
+      min-height: 50px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #f8f6ef;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .chip.selected {
+      color: #fff;
+      background: var(--brand);
+      border-color: var(--brand);
+      font-weight: 700;
+    }
+
+    .fields {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    select {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(29, 118, 111, .12);
+    }
+
+    .primary {
+      width: 100%;
+      min-height: 52px;
+      margin-top: 12px;
+      color: #fff;
+      background: var(--brand);
+      border-radius: 8px;
+      font-weight: 800;
+    }
+
+    .secondary {
+      min-height: 44px;
+      padding: 8px 12px;
+      color: var(--brand);
+      background: var(--soft);
+      border-radius: 8px;
+      font-weight: 700;
+    }
+
+    .step-body > .secondary {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .inline-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .inline-action span {
+      min-width: 0;
+    }
+
+    .small-button {
+      flex: 0 0 auto;
+      min-height: 40px;
+      padding: 7px 10px;
+      color: var(--brand);
+      background: var(--soft);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .checks {
+      display: grid;
+      gap: 10px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #f8f6ef;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .check input {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--brand);
+    }
+
+    .complete {
+      display: none;
+      margin-top: 14px;
+      padding: 16px;
+      background: var(--done);
+      border: 1px solid #cfe6c4;
+      border-radius: 8px;
+      color: #315d2f;
+      font-size: 20px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .complete.show {
+      display: block;
+    }
+
+    details {
+      margin-top: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    summary {
+      padding: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .history, .backup {
+      padding: 0 16px 16px;
+    }
+
+    .record {
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .record:first-child {
+      border-top: 0;
+    }
+
+    .record-date {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .record-title {
+      margin-top: 4px;
+      font-weight: 800;
+    }
+
+    .record-line {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .record-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .record-actions button {
+      min-height: 40px;
+      color: var(--brand);
+      background: var(--soft);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      padding: 12px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat b {
+      display: block;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .topic-card {
+      padding: 12px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .current-topic {
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .current-topic h2 {
+      margin: 4px 0 8px;
+      font-size: 21px;
+      line-height: 1.3;
+    }
+
+    .topic-panel {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .topic-panel.show {
+      display: block;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .button-grid button {
+      min-height: 44px;
+      padding: 8px 10px;
+      color: var(--brand);
+      background: var(--soft);
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .button-grid .danger {
+      color: #8f3436;
+      background: #f7e8e7;
+    }
+
+    .topic-card h3 {
+      margin: 4px 0;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .topic-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pill {
+      padding: 3px 7px;
+      background: #f2eee5;
+      border-radius: 999px;
+    }
+
+    .topic-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .topic-actions button {
+      min-height: 40px;
+      color: var(--brand);
+      background: var(--soft);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .full-row {
+      grid-column: 1 / -1;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .backup-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .hint {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 360px) {
+      .chips {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 27px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <nav class="switcher" aria-label="页面入口">
+      <button class="switch-button active" type="button" data-view-button="shooting">今日拍摄卡</button>
+      <button class="switch-button" type="button" data-view-button="capture">每日选题捕捉卡</button>
+      <button class="switch-button" type="button" data-view-button="weekly">每周选题库</button>
+    </nav>
+
+    <section class="view active" id="shootingView">
+    <section class="top" aria-label="今日信息">
+      <div class="date" id="todayText"></div>
+      <h1>母婴 IP 今日拍摄卡</h1>
+      <div class="goal">
+        <strong>今日目标：完成 1 条内容</strong>
+        <div class="focus">今天不做大规划，只完成这一条。</div>
+      </div>
+    </section>
+
+    <section class="current-topic" aria-label="当前选题">
+      <div class="topic-meta">
+        <span class="pill" id="shootingSourceText">来源：手动新增</span>
+        <span class="pill" id="shootingStatusText">草稿中</span>
+      </div>
+      <h2 id="shootingTitleText">今天想说什么？</h2>
+      <div class="record-line" id="shootingNoteText">可以从选题库选择，也可以先随便写一个当下感受。</div>
+      <div class="button-grid" id="topicActionButtons">
+        <button type="button" id="editShootingTopic">修改选题</button>
+        <button type="button" id="changeShootingTopic">更换选题</button>
+        <button class="danger" type="button" id="clearShootingTopic">清空重选</button>
+        <button type="button" id="stashShootingTopic">暂存到选题库</button>
+      </div>
+      <div class="button-grid" id="emptyTopicButtons">
+        <button type="button" id="emptyFromWeekly">从选题库选择</button>
+        <button type="button" id="emptyFromCapture">从每日捕捉卡选择</button>
+        <button type="button" id="emptyManual">手动新建</button>
+        <button type="button" id="emptyFeeling">随便写一个当下感受</button>
+      </div>
+
+      <div class="topic-panel" id="topicEditPanel">
+        <div class="fields">
+          <label>选题标题
+            <input type="text" id="shootingEditTitle" placeholder="今天要拍的选题标题">
+          </label>
+          <label>母题
+            <select id="shootingEditTopic"></select>
+          </label>
+          <label>角度
+            <select id="shootingEditAngle"></select>
+          </label>
+          <label>我想表达什么
+            <textarea id="shootingEditExpression"></textarea>
+          </label>
+          <label>核心观点
+            <textarea id="shootingEditPoint"></textarea>
+          </label>
+          <label>备注
+            <textarea id="shootingEditNote"></textarea>
+          </label>
+        </div>
+        <button class="primary" type="button" id="saveShootingTopicEdit">保存修改</button>
+      </div>
+
+      <div class="topic-panel" id="topicChangePanel">
+        <p class="hint">是否保留当前已写内容？更换前，先处理当前草稿。</p>
+        <div class="chips" id="changeKeepOptions"></div>
+        <div class="button-grid">
+          <button type="button" id="showCaptureChoices">从每日捕捉卡选择</button>
+          <button type="button" id="showWeeklyChoices">从每周选题库选择</button>
+          <button type="button" id="showManualChoice">手动新建一个选题</button>
+          <button type="button" id="showFeelingChoice">随便写一个当下感受</button>
+        </div>
+        <div class="mini-list" id="shootingChoiceList"></div>
+      </div>
+
+      <div class="topic-panel" id="topicClearPanel">
+        <p class="hint">确定要清空今日拍摄卡吗？已写内容可以先暂存到选题库。</p>
+        <div class="button-grid">
+          <button type="button" id="stashThenClear">暂存后清空</button>
+          <button class="danger" type="button" id="clearDirectly">直接清空</button>
+          <button type="button" id="cancelClear">取消</button>
+        </div>
+      </div>
+
+      <div class="complete" id="shootingTopicMessage"></div>
+    </section>
+
+    <section class="step active" data-step="topic">
+      <button class="step-header" type="button">
+        <span class="step-title">
+          <b>1. 选择母题</b>
+          <span id="topicSummary">先定今天聊什么</span>
+        </span>
+        <span class="status">当前</span>
+      </button>
+      <div class="step-body">
+        <div class="chips" id="topicChips"></div>
+      </div>
+    </section>
+
+    <section class="step" data-step="angle">
+      <button class="step-header" type="button">
+        <span class="step-title">
+          <b>2. 选择角度</b>
+          <span id="angleSummary">再定怎么讲</span>
+        </span>
+        <span class="status">未开始</span>
+      </button>
+      <div class="step-body">
+        <div class="chips" id="angleChips"></div>
+      </div>
+    </section>
+
+    <section class="step" data-step="structure">
+      <button class="step-header" type="button">
+        <span class="step-title">
+          <b>3. 拆一个爆款结构</b>
+          <span>只拆开头、中间、结尾</span>
+        </span>
+        <span class="status">未开始</span>
+      </button>
+      <div class="step-body">
+        <div class="fields">
+          <label>开头怎么抓人
+            <textarea id="hook" placeholder="例：新手妈妈最容易多花钱的地方，其实不是奶粉。"></textarea>
+          </label>
+          <label>中间讲几个点
+            <textarea id="middle" placeholder="例：讲 3 点：买之前、用的时候、复购时。"></textarea>
+          </label>
+          <label>结尾怎么收
+            <textarea id="ending" placeholder="例：先别急着买，确认这 3 件事。"></textarea>
+          </label>
+        </div>
+        <button class="primary" type="button" id="structureDone">拆完了，下一步</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="outline">
+      <button class="step-header" type="button">
+        <span class="step-title">
+          <b>4. 生成四句话提纲</b>
+          <span>生成后可以直接改</span>
+        </span>
+        <span class="status">未开始</span>
+      </button>
+      <div class="step-body">
+        <div class="fields">
+          <label>开头
+            <textarea id="lineOpening"></textarea>
+          </label>
+          <label>观点
+            <textarea id="linePoint"></textarea>
+          </label>
+          <label>经历
+            <textarea id="lineStory"></textarea>
+          </label>
+          <label>结论
+            <textarea id="lineClose"></textarea>
+          </label>
+        </div>
+        <button class="primary" type="button" id="generateOutline">生成四句话模板</button>
+        <button class="secondary" type="button" id="outlineDone">提纲好了</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="shoot">
+      <button class="step-header" type="button">
+        <span class="step-title">
+          <b>5. 拍摄打卡</b>
+          <span>按顺序勾掉就好</span>
+        </span>
+        <span class="status">未开始</span>
+      </button>
+      <div class="step-body">
+        <div class="checks" id="checkList"></div>
+      </div>
+    </section>
+
+    <div class="complete" id="completeMessage">今天完成了，明天继续一条就好。</div>
+
+    <details>
+      <summary>最近 7 天记录</summary>
+      <div class="history" id="historyList"></div>
+    </details>
+
+    <details>
+      <summary>备份</summary>
+      <div class="backup">
+        <div class="backup-actions">
+          <button class="secondary" type="button" id="exportJson">导出 JSON</button>
+          <button class="secondary" type="button" id="importJson">导入 JSON</button>
+        </div>
+        <input class="file-input" id="fileInput" type="file" accept="application/json,.json">
+        <p class="hint" id="backupHint">数据只保存在这台手机的浏览器里，换手机前先导出。</p>
+      </div>
+    </details>
+    </section>
+
+    <section class="view" id="captureView">
+      <section class="top" aria-label="今日选题捕捉">
+        <div class="date" id="captureTodayText"></div>
+        <h1>每日选题捕捉卡</h1>
+        <div class="goal">
+          <strong>今日目标：记录 1 个有感觉的选题</strong>
+          <div class="focus">先记录，不判断好坏。</div>
+        </div>
+      </section>
+
+      <section class="step active">
+        <button class="step-header" type="button">
+          <span class="step-title">
+            <b>今天先留下一个想法</b>
+            <span>先记下来，不用马上拍</span>
+          </span>
+          <span class="status">当前</span>
+        </button>
+        <div class="step-body">
+          <div class="fields">
+            <label>
+              <span class="inline-action">
+                <span>1. 我今天想说什么？</span>
+                <button class="small-button" type="button" id="voiceButton">🎙 语音记录</button>
+              </span>
+              <textarea id="captureTopic" placeholder="把当下最想说的话先写下来。"></textarea>
+            </label>
+            <label>2. 这个感受从哪里来？
+              <textarea id="captureSource" placeholder="生活经历 / 看到的视频 / 带娃瞬间 / 情绪波动 / 消费决策 / 工作副业"></textarea>
+            </label>
+            <label>3. 我想表达的观点是什么？
+              <textarea id="capturePoint" placeholder="我想提醒什么 / 反驳什么 / 分享什么 / 承认什么"></textarea>
+            </label>
+            <label>4. 适合哪个栏目？</label>
+            <div class="chips" id="captureColumnChips"></div>
+            <label>5. 是否需要今天拍？</label>
+            <div class="chips" id="captureShootChips"></div>
+          </div>
+          <button class="primary" type="button" id="saveCapture">保存今日选题</button>
+          <button class="secondary" type="button" id="moveTodayCapture">转入今日拍摄卡</button>
+          <p class="hint" id="voiceHint"></p>
+        </div>
+      </section>
+
+      <section class="step active">
+        <button class="step-header" type="button">
+          <span class="step-title">
+            <b>今日已捕捉选题</b>
+            <span>保存后会出现在这里</span>
+          </span>
+          <span class="status">今天</span>
+        </button>
+        <div class="step-body">
+          <div class="history" id="todayCaptureList"></div>
+        </div>
+      </section>
+
+      <div class="complete" id="captureMessage"></div>
+
+      <details>
+        <summary>最近 7 天选题捕捉</summary>
+        <div class="history" id="captureHistoryList"></div>
+      </details>
+    </section>
+
+    <section class="view" id="weeklyView">
+      <section class="top" aria-label="每周选题库">
+        <div class="date" id="weeklyTodayText"></div>
+        <h1>每周选题库</h1>
+        <div class="goal">
+          <strong>今日目标：挑出能拍的选题</strong>
+          <div class="focus">每日只捕捉，每周再筛选。</div>
+        </div>
+        <div class="stats" id="weeklyStats"></div>
+      </section>
+
+      <section class="step active">
+        <button class="step-header" type="button">
+          <span class="step-title">
+            <b>本周可拍选题</b>
+            <span>只看这周准备推进的内容</span>
+          </span>
+          <span class="status">本周</span>
+        </button>
+        <div class="step-body">
+          <div class="mini-list" id="weeklyScheduleList"></div>
+        </div>
+      </section>
+
+      <section class="step active">
+        <button class="step-header" type="button">
+          <span class="step-title">
+            <b>今日建议整理 3 条</b>
+            <span>不用全处理，先挑 3 条</span>
+          </span>
+          <span class="status">建议</span>
+        </button>
+        <div class="step-body">
+          <div class="mini-list" id="weeklySuggestionList"></div>
+        </div>
+      </section>
+
+      <details>
+        <summary>新增 / 加工一个选题</summary>
+        <div class="history">
+          <div class="fields">
+            <label>标题
+              <input type="text" id="weeklyTitle" placeholder="例：待产包不是焦虑包">
+            </label>
+            <label>来源池
+              <select id="weeklyPool"></select>
+            </label>
+            <label>栏目
+              <select id="weeklyColumn"></select>
+            </label>
+            <label>人群
+              <input type="text" id="weeklyAudience" placeholder="例：孕晚期新手妈妈">
+            </label>
+            <label>场景
+              <input type="text" id="weeklyScene" placeholder="例：准备待产包">
+            </label>
+            <label>冲突
+              <input type="text" id="weeklyConflict" placeholder="例：越买越焦虑">
+            </label>
+            <label>我的观点
+              <textarea id="weeklyPoint" placeholder="我真正想说的判断。"></textarea>
+            </label>
+            <label>原始灵感
+              <textarea id="weeklyInspiration" placeholder="把最原始的表达欲留下来。"></textarea>
+            </label>
+            <label>对标链接
+              <input type="text" id="weeklyBenchmarkLink" placeholder="视频链接，可空">
+            </label>
+            <label>可借鉴结构
+              <textarea id="weeklyBorrowStructure" placeholder="开头 / 中段 / 结尾哪里值得借鉴。"></textarea>
+            </label>
+            <label>表达欲
+              <select id="weeklyDesire"></select>
+            </label>
+            <label>拍摄难度
+              <select id="weeklyDifficulty"></select>
+            </label>
+            <label>状态
+              <select id="weeklyStatus"></select>
+            </label>
+            <label class="check">
+              <input id="weeklyThisWeek" type="checkbox"> 是否本周拍
+            </label>
+          </div>
+          <button class="primary" type="button" id="saveWeeklyTopic">保存到每周选题库</button>
+          <button class="secondary" type="button" id="clearWeeklyForm">清空表单</button>
+        </div>
+      </details>
+
+      <details>
+        <summary>三大池子与收集箱</summary>
+        <div class="history">
+          <div class="mini-list" id="weeklyAllList"></div>
+        </div>
+      </details>
+
+      <div class="complete" id="weeklyMessage"></div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "mxq_mom_ip_daily_card_v1";
+    const topics = ["待产包", "月子", "喂养", "宝宝用品", "新手妈妈焦虑", "妈妈省钱避坑", "妈妈个人成长", "AI/副业成长"];
+    const angles = ["避坑", "省钱", "真实经历", "反常识", "情绪共鸣", "个人成长", "消费决策"];
+    const checks = ["已确定选题", "已写四句话提纲", "已拍第一遍", "已补拍开头", "已剪辑", "已发布"];
+    const fields = ["hook", "middle", "ending", "lineOpening", "linePoint", "lineStory", "lineClose"];
+    const captureColumns = ["母婴避坑", "妈妈情绪", "妈妈消费决策", "新手妈妈经验", "个人成长", "AI/副业成长", "其他"];
+    const captureShootOptions = ["今天就拍", "先存起来", "不确定"];
+    const captureFields = ["captureTopic", "captureSource", "capturePoint"];
+    const weeklyPools = ["收集箱", "感受池", "对标池", "热点池"];
+    const weeklyStatuses = ["收集箱", "可拍", "待研究", "暂存", "放弃", "已拍"];
+    const weeklyDesires = ["强", "中", "弱"];
+    const weeklyDifficulties = ["低", "中", "高"];
+    const weeklyFields = ["weeklyTitle", "weeklyAudience", "weeklyScene", "weeklyConflict", "weeklyPoint", "weeklyInspiration", "weeklyBenchmarkLink", "weeklyBorrowStructure"];
+    const changeKeepOptions = ["保留为草稿", "暂存到选题库", "丢弃并换新选题"];
+    const columnToTopic = {
+      "母婴避坑": "妈妈省钱避坑",
+      "妈妈情绪": "新手妈妈焦虑",
+      "妈妈消费决策": "宝宝用品",
+      "新手妈妈经验": "新手妈妈焦虑",
+      "个人成长": "妈妈个人成长",
+      "AI/副业成长": "AI/副业成长",
+      "其他": ""
+    };
+    const pointToAngle = [
+      ["避坑", "避坑"],
+      ["省钱", "省钱"],
+      ["反驳", "反常识"],
+      ["反常识", "反常识"],
+      ["焦虑", "情绪共鸣"],
+      ["情绪", "情绪共鸣"],
+      ["成长", "个人成长"],
+      ["消费", "消费决策"],
+      ["买", "消费决策"]
+    ];
+
+    const $ = (selector) => document.querySelector(selector);
+    const today = new Date();
+    const todayKey = toDateKey(today);
+
+    let state = loadState();
+    let current = normalizeDay(state.days[todayKey] || makeDay());
+    let captureDraft = makeCapture();
+    let captureEditId = "";
+    let weeklyDraftId = "";
+    let changeMode = "暂存到选题库";
+    let choiceMode = "";
+    let pinnedStep = null;
+    state.days[todayKey] = current;
+    state.captures = state.captures || {};
+    state.captureItems = state.captureItems || [];
+    state.weeklyTopics = state.weeklyTopics || [];
+    migrateLegacyCaptures();
+
+    $("#todayText").textContent = today.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long"
+    });
+    $("#captureTodayText").textContent = $("#todayText").textContent;
+    $("#weeklyTodayText").textContent = $("#todayText").textContent;
+
+    function makeDay() {
+      return {
+        date: todayKey,
+        shootingTitle: "",
+        shootingSource: "手动新增",
+        expression: "",
+        corePoint: "",
+        note: "",
+        topic: "",
+        angle: "",
+        hook: "",
+        middle: "",
+        ending: "",
+        lineOpening: "",
+        linePoint: "",
+        lineStory: "",
+        lineClose: "",
+        weeklyTopicId: "",
+        checks: {}
+      };
+    }
+
+    function normalizeDay(day) {
+      return {
+        ...makeDay(),
+        ...day,
+        checks: day.checks || {},
+        shootingSource: day.shootingSource || "手动新增"
+      };
+    }
+
+    function makeCapture() {
+      return {
+        id: `capture-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        date: todayKey,
+        topicText: "",
+        source: "",
+        point: "",
+        column: "",
+        shootNeed: "",
+        createdAt: "",
+        movedToShoot: false
+      };
+    }
+
+    function makeWeeklyTopic() {
+      return {
+        id: `topic-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        title: "",
+        pool: "收集箱",
+        column: "",
+        audience: "",
+        scene: "",
+        conflict: "",
+        point: "",
+        inspiration: "",
+        benchmarkLink: "",
+        borrowStructure: "",
+        desire: "中",
+        difficulty: "中",
+        status: "收集箱",
+        thisWeek: false,
+        movedToShoot: false,
+        shot: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        sourceKey: ""
+      };
+    }
+
+    function toDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && saved.days) {
+          saved.captures = saved.captures || {};
+          saved.captureItems = saved.captureItems || [];
+          saved.weeklyTopics = saved.weeklyTopics || [];
+          return saved;
+        }
+      } catch (error) {
+        console.warn("读取本地数据失败", error);
+      }
+      return { days: {}, captures: {}, captureItems: [], weeklyTopics: [] };
+    }
+
+    function migrateLegacyCaptures() {
+      state.captureItems = state.captureItems || [];
+      Object.values(state.captures || {}).forEach((capture) => {
+        if (!capture || (!capture.topicText && !capture.point)) return;
+        const exists = state.captureItems.some((item) => item.sourceKey === `legacy-${capture.date}`);
+        if (exists) return;
+        state.captureItems.push({
+          ...makeCapture(),
+          ...capture,
+          id: capture.id || `capture-legacy-${capture.date}`,
+          sourceKey: `legacy-${capture.date}`,
+          createdAt: capture.createdAt || `${capture.date}T00:00:00.000Z`
+        });
+      });
+    }
+
+    function save() {
+      state.days[todayKey] = current;
+      state.captures = state.captures || {};
+      state.captureItems = state.captureItems || [];
+      state.weeklyTopics = state.weeklyTopics || [];
+      const entries = Object.entries(state.days)
+        .sort(([a], [b]) => b.localeCompare(a))
+        .slice(0, 7);
+      const captureEntries = Object.entries(state.captures)
+        .sort(([a], [b]) => b.localeCompare(a))
+        .slice(0, 7);
+      state.days = Object.fromEntries(entries);
+      state.captures = Object.fromEntries(captureEntries);
+      state.captureItems = state.captureItems
+        .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))
+        .slice(0, 100);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+    }
+
+    function saveCaptureOnly() {
+      state.captures = state.captures || {};
+      state.captureItems = state.captureItems || [];
+      captureDraft.id = captureEditId || captureDraft.id || makeCapture().id;
+      captureDraft.date = todayKey;
+      captureDraft.createdAt = captureDraft.createdAt || new Date().toISOString();
+      const index = state.captureItems.findIndex((item) => item.id === captureDraft.id);
+      if (index >= 0) {
+        state.captureItems[index] = { ...captureDraft };
+      } else {
+        state.captureItems.unshift({ ...captureDraft });
+      }
+      state.captures[todayKey] = { ...captureDraft };
+      upsertCaptureIntoWeekly(captureDraft);
+      save();
+    }
+
+    function clearCaptureForm(shouldFocus = false) {
+      captureDraft = makeCapture();
+      captureEditId = "";
+      $("#voiceHint").textContent = "";
+      renderCapture();
+      if (shouldFocus) $("#captureTopic").focus();
+    }
+
+    function upsertCaptureIntoWeekly(capture) {
+      if (!capture.topicText && !capture.point) return;
+      state.weeklyTopics = state.weeklyTopics || [];
+      const sourceKey = `capture-${capture.id || capture.date}`;
+      const existing = state.weeklyTopics.find((topic) => topic.sourceKey === sourceKey);
+      const patch = {
+        title: (capture.topicText || capture.point || "每日捕捉选题").slice(0, 32),
+        pool: "收集箱",
+        column: capture.column || "",
+        point: capture.point || "",
+        inspiration: capture.topicText || "",
+        scene: capture.source || "",
+        status: "收集箱",
+        thisWeek: capture.shootNeed === "今天就拍",
+        sourceKey,
+        updatedAt: new Date().toISOString()
+      };
+      if (existing) {
+        Object.assign(existing, patch);
+      } else {
+        state.weeklyTopics.unshift({ ...makeWeeklyTopic(), ...patch });
+      }
+    }
+
+    function renderChips(container, items, selected, onPick) {
+      container.innerHTML = "";
+      items.forEach((item) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `chip${item === selected ? " selected" : ""}`;
+        button.textContent = item;
+        button.addEventListener("click", () => onPick(item));
+        container.appendChild(button);
+      });
+    }
+
+    function renderChecks() {
+      const list = $("#checkList");
+      list.innerHTML = "";
+      checks.forEach((item) => {
+        const label = document.createElement("label");
+        label.className = "check";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = Boolean(current.checks[item]);
+        input.addEventListener("change", () => {
+          current.checks[item] = input.checked;
+          if (item === "已发布" && input.checked) {
+            checks.forEach((check) => current.checks[check] = true);
+            markWeeklyShotFromToday();
+          }
+          save();
+        });
+        label.append(input, document.createTextNode(item));
+        list.appendChild(label);
+      });
+    }
+
+    function stepProgress() {
+      return {
+        topic: Boolean(current.topic),
+        angle: Boolean(current.angle),
+        structure: Boolean(current.hook.trim() || current.middle.trim() || current.ending.trim()),
+        outline: Boolean(current.lineOpening.trim() || current.linePoint.trim() || current.lineStory.trim() || current.lineClose.trim()),
+        shoot: Boolean(current.checks["已发布"])
+      };
+    }
+
+    function firstOpenStep(progress) {
+      if (!progress.topic) return "topic";
+      if (!progress.angle) return "angle";
+      if (!progress.structure) return "structure";
+      if (!progress.outline) return "outline";
+      return "shoot";
+    }
+
+    function renderSteps() {
+      const progress = stepProgress();
+      const active = pinnedStep || firstOpenStep(progress);
+      document.querySelectorAll("#shootingView .step").forEach((step) => {
+        const name = step.dataset.step;
+        const done = progress[name];
+        step.classList.toggle("done", done);
+        step.classList.toggle("active", name === active);
+        step.querySelector(".status").textContent = name === active ? "当前" : (done ? "已完成" : "未开始");
+      });
+      $("#topicSummary").textContent = current.topic || "先定今天聊什么";
+      $("#angleSummary").textContent = current.angle || "再定怎么讲";
+      $("#completeMessage").classList.toggle("show", Boolean(current.checks["已发布"]));
+    }
+
+    function renderHistory() {
+      const records = Object.values(state.days)
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 7);
+      const history = $("#historyList");
+      history.innerHTML = "";
+
+      if (!records.length) {
+        history.innerHTML = '<div class="empty">还没有记录。</div>';
+        return;
+      }
+
+      records.forEach((record) => {
+        const outline = [record.lineOpening, record.linePoint, record.lineStory, record.lineClose]
+          .filter(Boolean)
+          .join(" / ");
+        const item = document.createElement("article");
+        item.className = "record";
+        item.innerHTML = `
+          <div class="record-date">
+            <span>${record.date}</span>
+            <span>${record.checks && record.checks["已发布"] ? "已发布" : "未发布"}</span>
+          </div>
+          <div class="record-title">${record.topic || "未选母题"} · ${record.angle || "未选角度"}</div>
+          <div class="record-line">${outline || record.hook || "还没有提纲"}</div>
+        `;
+        history.appendChild(item);
+      });
+    }
+
+    function renderCapture() {
+      $("#captureTopic").value = captureDraft.topicText || "";
+      $("#captureSource").value = captureDraft.source || "";
+      $("#capturePoint").value = captureDraft.point || "";
+      renderChips($("#captureColumnChips"), captureColumns, captureDraft.column, (item) => {
+        captureDraft.column = item;
+        renderCapture();
+      });
+      renderChips($("#captureShootChips"), captureShootOptions, captureDraft.shootNeed, (item) => {
+        captureDraft.shootNeed = item;
+        renderCapture();
+      });
+      $("#saveCapture").textContent = captureEditId ? "保存修改" : "保存今日选题";
+      $("#moveTodayCapture").style.display = captureDraft.shootNeed === "今天就拍" && captureEditId ? "block" : "none";
+      renderTodayCaptureList();
+      renderCaptureHistory();
+    }
+
+    function captureRecords() {
+      return state.captureItems || [];
+    }
+
+    function captureStatus(record) {
+      if (record.movedToShoot) return "已转拍摄卡";
+      return "已保存";
+    }
+
+    function captureTime(record) {
+      if (!record.createdAt) return "";
+      try {
+        return new Date(record.createdAt).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function renderTodayCaptureList() {
+      const records = captureRecords()
+        .filter((record) => record.date === todayKey)
+        .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+      const list = $("#todayCaptureList");
+      list.innerHTML = "";
+
+      if (!records.length) {
+        list.innerHTML = '<div class="empty">今天还没有保存选题。保存后可以继续记下一条。</div>';
+        return;
+      }
+
+      records.forEach((record) => {
+        const preview = (record.topicText || record.point || "未命名选题").slice(0, 30);
+        const item = document.createElement("article");
+        item.className = "record";
+        item.innerHTML = `
+          <div class="record-date">
+            <span>${captureTime(record)}</span>
+            <span>${captureStatus(record)}</span>
+          </div>
+          <div class="record-title">${preview}${(record.topicText || record.point || "").length > 30 ? "..." : ""}</div>
+          <div class="record-line">${record.column || "未选栏目"} · ${record.shootNeed || "未选择是否今天拍"}</div>
+          <div class="record-actions">
+            <button type="button" data-capture-action="move" data-id="${record.id}">转入今日拍摄卡</button>
+            <button type="button" data-capture-action="edit" data-id="${record.id}">编辑</button>
+            <button type="button" data-capture-action="delete" data-id="${record.id}">删除</button>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function renderCaptureHistory() {
+      const cutoffDates = [...new Set(captureRecords().map((record) => record.date))]
+        .sort((a, b) => b.localeCompare(a))
+        .slice(0, 7);
+      const records = captureRecords()
+        .filter((record) => cutoffDates.includes(record.date))
+        .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+      const history = $("#captureHistoryList");
+      history.innerHTML = "";
+
+      if (!records.length) {
+        history.innerHTML = '<div class="empty">还没有选题记录。</div>';
+        return;
+      }
+
+      records.forEach((record) => {
+        const status = record.movedToShoot ? "已转拍摄" : (record.shootNeed === "不确定" ? "不确定" : "已保存");
+        const preview = (record.topicText || "还没有写想说什么").slice(0, 30);
+        const item = document.createElement("article");
+        item.className = "record";
+        item.innerHTML = `
+          <div class="record-date">
+            <span>${record.date}</span>
+            <span>${status}</span>
+          </div>
+          <div class="record-title">${record.column || "未选栏目"}</div>
+          <div class="record-line">${preview}${(record.topicText || "").length > 30 ? "..." : ""}</div>
+          <div class="record-actions">
+            <button type="button" data-capture-action="move" data-id="${record.id}">转入拍摄卡</button>
+            <button type="button" data-capture-action="edit" data-id="${record.id}">编辑</button>
+            <button type="button" data-capture-action="delete" data-id="${record.id}">删除</button>
+          </div>
+        `;
+        history.appendChild(item);
+      });
+    }
+
+    function hasShootingTopic() {
+      return Boolean(
+        current.shootingTitle ||
+        current.topic ||
+        current.angle ||
+        current.hook ||
+        current.expression ||
+        current.corePoint ||
+        current.lineOpening ||
+        current.linePoint ||
+        current.lineStory ||
+        current.lineClose
+      );
+    }
+
+    function shootingDisplayTitle() {
+      return current.shootingTitle || current.hook || current.expression || current.topic || "今天想说什么？";
+    }
+
+    function shootingStatus() {
+      if (current.checks["已发布"]) return "已发布";
+      if (current.checks["已剪辑"] || current.checks["已拍第一遍"]) return "已拍";
+      if (current.lineOpening || current.linePoint || current.lineStory || current.lineClose || current.checks["已写四句话提纲"]) return "已写提纲";
+      return "草稿中";
+    }
+
+    function renderShootingTopicBox() {
+      const hasTopic = hasShootingTopic();
+      $("#shootingTitleText").textContent = hasTopic ? shootingDisplayTitle() : "今天想说什么？";
+      $("#shootingSourceText").textContent = `来源：${current.shootingSource || "手动新增"}`;
+      $("#shootingStatusText").textContent = shootingStatus();
+      $("#shootingNoteText").textContent = hasTopic
+        ? (current.corePoint || current.expression || current.note || "可以修改、暂存，或者随时更换。")
+        : "可以从选题库选择，也可以先随便写一个当下感受。";
+      $("#topicActionButtons").style.display = hasTopic ? "grid" : "none";
+      $("#emptyTopicButtons").style.display = hasTopic ? "none" : "grid";
+      renderSelect($("#shootingEditTopic"), ["", ...topics], current.topic || "");
+      renderSelect($("#shootingEditAngle"), ["", ...angles], current.angle || "");
+      renderChips($("#changeKeepOptions"), changeKeepOptions, changeMode, (item) => {
+        changeMode = item;
+        renderShootingTopicBox();
+      });
+    }
+
+    function showShootingPanel(id) {
+      ["topicEditPanel", "topicChangePanel", "topicClearPanel"].forEach((panelId) => {
+        document.getElementById(panelId).classList.toggle("show", panelId === id);
+      });
+      $("#shootingTopicMessage").classList.remove("show");
+    }
+
+    function fillShootingEditForm() {
+      $("#shootingEditTitle").value = current.shootingTitle || shootingDisplayTitle();
+      renderSelect($("#shootingEditTopic"), ["", ...topics], current.topic || "");
+      renderSelect($("#shootingEditAngle"), ["", ...angles], current.angle || "");
+      $("#shootingEditExpression").value = current.expression || current.hook || "";
+      $("#shootingEditPoint").value = current.corePoint || current.linePoint || "";
+      $("#shootingEditNote").value = current.note || "";
+    }
+
+    function saveShootingEdit() {
+      current.shootingTitle = $("#shootingEditTitle").value.trim();
+      current.topic = $("#shootingEditTopic").value;
+      current.angle = $("#shootingEditAngle").value;
+      current.expression = $("#shootingEditExpression").value.trim();
+      current.corePoint = $("#shootingEditPoint").value.trim();
+      current.note = $("#shootingEditNote").value.trim();
+      current.hook = current.hook || current.expression;
+      current.linePoint = current.linePoint || current.corePoint;
+      current.shootingSource = current.shootingSource || "手动新增";
+      pinnedStep = current.topic ? "angle" : "topic";
+      showShootingPanel("");
+      $("#shootingTopicMessage").textContent = "选题已更新，已写好的四句话不会丢。";
+      $("#shootingTopicMessage").classList.add("show");
+      save();
+    }
+
+    function currentToWeeklyTopic(status = "暂存", reason = "今日不想拍了") {
+      if (!hasShootingTopic()) return null;
+      const topic = {
+        ...makeWeeklyTopic(),
+        title: shootingDisplayTitle(),
+        pool: "感受池",
+        column: topicToColumn(current.topic),
+        point: current.corePoint || current.linePoint || current.angle || "",
+        inspiration: current.expression || current.hook || "",
+        borrowStructure: [current.lineOpening, current.linePoint, current.lineStory, current.lineClose].filter(Boolean).join("\n"),
+        status,
+        thisWeek: false,
+        movedToShoot: false,
+        shot: false,
+        sourceKey: `shooting-${todayKey}-${Date.now()}`,
+        note: current.note || "",
+        shootingTopic: current.topic || "",
+        shootingAngle: current.angle || "",
+        stashReason: reason,
+        outline: {
+          opening: current.lineOpening || "",
+          point: current.linePoint || "",
+          story: current.lineStory || "",
+          close: current.lineClose || ""
+        }
+      };
+      state.weeklyTopics.unshift(topic);
+      return topic;
+    }
+
+    function topicToColumn(topic) {
+      const map = {
+        "妈妈省钱避坑": "母婴避坑",
+        "新手妈妈焦虑": "妈妈情绪",
+        "宝宝用品": "妈妈消费决策",
+        "妈妈个人成长": "个人成长",
+        "AI/副业成长": "AI/副业成长"
+      };
+      return map[topic] || "新手妈妈经验";
+    }
+
+    function resetCurrentDay() {
+      current = makeDay();
+      state.days[todayKey] = current;
+      pinnedStep = "topic";
+    }
+
+    function handleCurrentBeforeReplace() {
+      if (!hasShootingTopic()) return;
+      if (changeMode === "暂存到选题库") {
+        currentToWeeklyTopic("暂存", "更换今日选题前暂存");
+      }
+      if (changeMode === "保留为草稿") {
+        currentToWeeklyTopic("暂存", "保留为草稿");
+      }
+    }
+
+    function applyShootingSelection(selection) {
+      handleCurrentBeforeReplace();
+      const keepChecks = {};
+      current = {
+        ...makeDay(),
+        shootingTitle: selection.title || "",
+        shootingSource: selection.source || "手动新增",
+        expression: selection.expression || "",
+        corePoint: selection.corePoint || "",
+        note: selection.note || "",
+        topic: selection.topic || "",
+        angle: selection.angle || "",
+        hook: selection.expression || selection.title || "",
+        middle: selection.note || "",
+        ending: selection.corePoint || "",
+        weeklyTopicId: selection.weeklyTopicId || "",
+        checks: keepChecks
+      };
+      state.days[todayKey] = current;
+      pinnedStep = current.topic ? "angle" : "topic";
+      showShootingPanel("");
+      $("#shootingTopicMessage").textContent = "新选题已放进今日拍摄卡，可以继续往下写。";
+      $("#shootingTopicMessage").classList.add("show");
+      save();
+    }
+
+    function renderShootingChoices(mode) {
+      choiceMode = mode;
+      const list = $("#shootingChoiceList");
+      list.innerHTML = "";
+      if (mode === "manual" || mode === "feeling") {
+        list.innerHTML = `
+          <article class="topic-card">
+            <h3>${mode === "feeling" ? "随便写一个当下感受" : "手动新建一个选题"}</h3>
+            <div class="fields">
+              <label>标题或当下感受
+                <textarea id="manualChoiceTitle" placeholder="先写下来，不用判断好不好。"></textarea>
+              </label>
+              <label>核心观点
+                <textarea id="manualChoicePoint" placeholder="我大概想表达什么。"></textarea>
+              </label>
+            </div>
+            <button class="primary" type="button" id="useManualChoice">使用这个选题</button>
+          </article>
+        `;
+        return;
+      }
+      const records = mode === "capture"
+        ? captureRecords().sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")).slice(0, 12)
+        : (state.weeklyTopics || []).filter((topic) => topic.status !== "放弃").slice(0, 12);
+      if (!records.length) {
+        list.innerHTML = `<div class="empty">${mode === "capture" ? "每日捕捉卡还没有记录。" : "每周选题库还没有可选内容。"}</div>`;
+        return;
+      }
+      records.forEach((record, index) => {
+        const title = mode === "capture" ? (record.topicText || record.point || "每日捕捉选题") : (record.title || "未命名选题");
+        const meta = mode === "capture" ? `${record.date} · ${record.column || "未选栏目"}` : `${record.pool || "收集箱"} · ${record.status || "收集箱"}`;
+        const item = document.createElement("article");
+        item.className = "topic-card";
+        item.innerHTML = `
+          <div class="topic-meta"><span class="pill">${meta}</span></div>
+          <h3>${title}</h3>
+          <div class="record-line">${mode === "capture" ? (record.point || record.source || "") : (record.point || record.inspiration || "")}</div>
+          <button class="primary" type="button" data-choice-mode="${mode}" data-choice-index="${index}">选择这条</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function renderSelect(select, items, selected) {
+      select.innerHTML = "";
+      items.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        option.selected = item === selected;
+        select.appendChild(option);
+      });
+    }
+
+    function renderWeekly() {
+      state.weeklyTopics = state.weeklyTopics || [];
+      const topicsAll = state.weeklyTopics;
+      const inboxCount = topicsAll.filter((topic) => topic.status === "收集箱").length;
+      const feelingCount = topicsAll.filter((topic) => topic.pool === "感受池").length;
+      const benchmarkCount = topicsAll.filter((topic) => topic.pool === "对标池").length;
+      const hotCount = topicsAll.filter((topic) => topic.pool === "热点池").length;
+      const shootable = topicsAll.filter((topic) => topic.thisWeek && !["放弃", "已拍"].includes(topic.status));
+      $("#weeklyStats").innerHTML = `
+        <div class="stat"><b>${shootable.length}</b><span>本周可拍</span></div>
+        <div class="stat"><b>${inboxCount}</b><span>收集箱</span></div>
+        <div class="stat"><b>${feelingCount}</b><span>感受池</span></div>
+        <div class="stat"><b>${benchmarkCount + hotCount}</b><span>对标池 + 热点池</span></div>
+      `;
+
+      renderWeeklyList($("#weeklyScheduleList"), shootable, "这周还没有排期，先从建议里挑 1 条。");
+      const suggestions = topicsAll
+        .filter((topic) => !topic.shot && topic.status !== "放弃")
+        .sort((a, b) => scoreWeeklyTopic(b) - scoreWeeklyTopic(a))
+        .slice(0, 3);
+      renderWeeklyList($("#weeklySuggestionList"), suggestions, "暂时没有需要整理的选题。");
+      renderWeeklyList($("#weeklyAllList"), topicsAll, "还没有选题，先从新增/加工里记一条。");
+
+      renderSelect($("#weeklyPool"), weeklyPools, $("#weeklyPool").value || "感受池");
+      renderSelect($("#weeklyColumn"), captureColumns, $("#weeklyColumn").value || "母婴避坑");
+      renderSelect($("#weeklyDesire"), weeklyDesires, $("#weeklyDesire").value || "中");
+      renderSelect($("#weeklyDifficulty"), weeklyDifficulties, $("#weeklyDifficulty").value || "中");
+      renderSelect($("#weeklyStatus"), weeklyStatuses, $("#weeklyStatus").value || "收集箱");
+    }
+
+    function scoreWeeklyTopic(topic) {
+      const desire = topic.desire === "强" ? 3 : topic.desire === "中" ? 2 : 1;
+      const difficulty = topic.difficulty === "低" ? 3 : topic.difficulty === "中" ? 2 : 1;
+      const status = topic.status === "可拍" ? 4 : topic.status === "待研究" ? 2 : 1;
+      return desire + difficulty + status + (topic.thisWeek ? 2 : 0);
+    }
+
+    function renderWeeklyList(container, records, emptyText) {
+      container.innerHTML = "";
+      if (!records.length) {
+        container.innerHTML = `<div class="empty">${emptyText}</div>`;
+        return;
+      }
+      records.forEach((topic) => {
+        const item = document.createElement("article");
+        item.className = "topic-card";
+        item.innerHTML = `
+          <div class="topic-meta">
+            <span class="pill">${topic.pool || "收集箱"}</span>
+            <span class="pill">${topic.status || "收集箱"}</span>
+            <span class="pill">${topic.column || "未选栏目"}</span>
+          </div>
+          <h3>${topic.title || "未命名选题"}</h3>
+          <div class="record-line">${topic.point || topic.inspiration || "还没有补充观点"}</div>
+          <div class="topic-meta">
+            <span>表达欲：${topic.desire || "中"}</span>
+            <span>难度：${topic.difficulty || "中"}</span>
+            <span>${topic.thisWeek ? "本周拍" : "未排期"}</span>
+          </div>
+          <div class="topic-actions">
+            <button type="button" data-weekly-action="edit" data-id="${topic.id}">编辑</button>
+            <button type="button" data-weekly-action="ready" data-id="${topic.id}">标记可拍</button>
+            <button type="button" data-weekly-action="week" data-id="${topic.id}">${topic.thisWeek ? "移出本周" : "加入本周"}</button>
+            <button type="button" data-weekly-action="move" data-id="${topic.id}">转今日卡</button>
+            <button type="button" data-weekly-action="shot" data-id="${topic.id}">标记已拍</button>
+            <button type="button" data-weekly-action="abandon" data-id="${topic.id}">放弃</button>
+            <button class="full-row" type="button" data-weekly-action="markdown" data-id="${topic.id}">导出 Obsidian Markdown</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function render() {
+      renderChips($("#topicChips"), topics, current.topic, (item) => {
+        current.topic = item;
+        current.checks["已确定选题"] = true;
+        pinnedStep = "angle";
+        save();
+      });
+      renderChips($("#angleChips"), angles, current.angle, (item) => {
+        current.angle = item;
+        pinnedStep = "structure";
+        save();
+      });
+      fields.forEach((id) => {
+        const element = document.getElementById(id);
+        if (element.value !== current[id]) element.value = current[id] || "";
+      });
+      renderChecks();
+      renderSteps();
+      renderHistory();
+      renderShootingTopicBox();
+      renderCapture();
+      renderWeekly();
+    }
+
+    function switchView(name) {
+      document.querySelectorAll(".view").forEach((view) => view.classList.remove("active"));
+      document.querySelectorAll(".switch-button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.viewButton === name);
+      });
+      const id = name === "capture" ? "captureView" : name === "weekly" ? "weeklyView" : "shootingView";
+      document.getElementById(id).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function suggestAngle(point) {
+      const text = point || "";
+      const matched = pointToAngle.find(([key]) => text.includes(key));
+      return matched ? matched[1] : "";
+    }
+
+    function findCapture(identifier = todayKey) {
+      return captureRecords().find((record) => record.id === identifier) || (state.captures && state.captures[identifier]);
+    }
+
+    function moveCaptureToShooting(identifier = todayKey) {
+      const record = findCapture(identifier);
+      if (!record) return;
+      current.topic = columnToTopic[record.column] || current.topic || "";
+      current.angle = suggestAngle(record.point);
+      current.shootingTitle = record.topicText || record.point || "每日捕捉选题";
+      current.shootingSource = "每日捕捉卡";
+      current.expression = record.topicText || "";
+      current.corePoint = record.point || "";
+      current.note = record.source || "";
+      current.hook = record.topicText || current.hook || "";
+      current.middle = record.source || current.middle || "";
+      current.ending = record.point || current.ending || "";
+      current.checks["已确定选题"] = Boolean(current.topic || current.hook);
+      record.movedToShoot = true;
+      if (record.date) state.captures[record.date] = record;
+      const item = state.captureItems.find((capture) => capture.id === record.id);
+      if (item) item.movedToShoot = true;
+      if (captureEditId === record.id) captureDraft = { ...record };
+      pinnedStep = "angle";
+      $("#captureMessage").textContent = "这个选题已经放进今日拍摄卡，可以继续写四句话提纲。";
+      $("#captureMessage").classList.add("show");
+      save();
+      switchView("shooting");
+    }
+
+    function weeklyFromForm() {
+      const existing = state.weeklyTopics.find((topic) => topic.id === weeklyDraftId);
+      const topic = existing || makeWeeklyTopic();
+      topic.title = $("#weeklyTitle").value.trim() || "未命名选题";
+      topic.pool = $("#weeklyPool").value;
+      topic.column = $("#weeklyColumn").value;
+      topic.audience = $("#weeklyAudience").value.trim();
+      topic.scene = $("#weeklyScene").value.trim();
+      topic.conflict = $("#weeklyConflict").value.trim();
+      topic.point = $("#weeklyPoint").value.trim();
+      topic.inspiration = $("#weeklyInspiration").value.trim();
+      topic.benchmarkLink = $("#weeklyBenchmarkLink").value.trim();
+      topic.borrowStructure = $("#weeklyBorrowStructure").value.trim();
+      topic.desire = $("#weeklyDesire").value;
+      topic.difficulty = $("#weeklyDifficulty").value;
+      topic.status = $("#weeklyStatus").value;
+      topic.thisWeek = $("#weeklyThisWeek").checked;
+      topic.updatedAt = new Date().toISOString();
+      return topic;
+    }
+
+    function fillWeeklyForm(topic) {
+      weeklyDraftId = topic ? topic.id : "";
+      $("#weeklyTitle").value = topic ? topic.title || "" : "";
+      renderSelect($("#weeklyPool"), weeklyPools, topic ? topic.pool : "感受池");
+      renderSelect($("#weeklyColumn"), captureColumns, topic ? topic.column : "母婴避坑");
+      $("#weeklyAudience").value = topic ? topic.audience || "" : "";
+      $("#weeklyScene").value = topic ? topic.scene || "" : "";
+      $("#weeklyConflict").value = topic ? topic.conflict || "" : "";
+      $("#weeklyPoint").value = topic ? topic.point || "" : "";
+      $("#weeklyInspiration").value = topic ? topic.inspiration || "" : "";
+      $("#weeklyBenchmarkLink").value = topic ? topic.benchmarkLink || "" : "";
+      $("#weeklyBorrowStructure").value = topic ? topic.borrowStructure || "" : "";
+      renderSelect($("#weeklyDesire"), weeklyDesires, topic ? topic.desire : "中");
+      renderSelect($("#weeklyDifficulty"), weeklyDifficulties, topic ? topic.difficulty : "中");
+      renderSelect($("#weeklyStatus"), weeklyStatuses, topic ? topic.status : "收集箱");
+      $("#weeklyThisWeek").checked = topic ? Boolean(topic.thisWeek) : false;
+    }
+
+    function saveWeeklyFromForm() {
+      const topic = weeklyFromForm();
+      const index = state.weeklyTopics.findIndex((item) => item.id === topic.id);
+      if (index >= 0) {
+        state.weeklyTopics[index] = topic;
+      } else {
+        state.weeklyTopics.unshift(topic);
+      }
+      weeklyDraftId = topic.id;
+      $("#weeklyMessage").textContent = "这个选题已保存，先放在库里慢慢筛。";
+      $("#weeklyMessage").classList.add("show");
+      save();
+    }
+
+    function moveWeeklyToShooting(id) {
+      const topic = state.weeklyTopics.find((item) => item.id === id);
+      if (!topic) return;
+      current.topic = columnToTopic[topic.column] || current.topic || "";
+      current.angle = suggestAngle(topic.point || topic.conflict);
+      current.shootingTitle = topic.title || "";
+      current.shootingSource = "每周选题库";
+      current.expression = topic.inspiration || "";
+      current.corePoint = topic.point || "";
+      current.note = topic.scene || topic.conflict || "";
+      current.hook = topic.title || topic.inspiration || current.hook || "";
+      current.middle = topic.conflict || topic.scene || current.middle || "";
+      current.ending = topic.point || current.ending || "";
+      current.weeklyTopicId = topic.id;
+      current.checks["已确定选题"] = true;
+      topic.movedToShoot = true;
+      topic.thisWeek = true;
+      if (topic.status === "收集箱" || topic.status === "暂存") topic.status = "可拍";
+      pinnedStep = "angle";
+      $("#weeklyMessage").textContent = "这个选题已经放进今日拍摄卡，可以继续写四句话提纲。";
+      $("#weeklyMessage").classList.add("show");
+      save();
+      switchView("shooting");
+    }
+
+    function markWeeklyShotFromToday() {
+      if (!current.weeklyTopicId) return;
+      const topic = state.weeklyTopics.find((item) => item.id === current.weeklyTopicId);
+      if (!topic) return;
+      topic.status = "已拍";
+      topic.shot = true;
+      topic.thisWeek = false;
+      topic.updatedAt = new Date().toISOString();
+    }
+
+    function weeklyMarkdown(topic) {
+      const safeTitle = topic.title || "未命名选题";
+      return `# ${safeTitle}
+
+状态：${topic.status || ""}
+栏目：${topic.column || ""}
+来源：${topic.pool || ""}
+人群：${topic.audience || ""}
+场景：${topic.scene || ""}
+冲突：${topic.conflict || ""}
+我的观点：${topic.point || ""}
+
+## 原始灵感
+${topic.inspiration || ""}
+
+## 对标参考
+- 链接：${topic.benchmarkLink || ""}
+- 可借鉴结构：${topic.borrowStructure || ""}
+
+## 四句话提纲
+开头：${topic.outline ? topic.outline.opening || "" : ""}
+观点：${topic.outline ? topic.outline.point || "" : ""}
+经历：${topic.outline ? topic.outline.story || "" : ""}
+结论：${topic.outline ? topic.outline.close || "" : ""}
+
+## 后续动作
+- [ ] 找 1 条对标
+- [ ] 写四句话
+- [ ] 转入今日拍摄卡
+`;
+    }
+
+    function exportWeeklyMarkdown(id) {
+      const topic = state.weeklyTopics.find((item) => item.id === id);
+      if (!topic) return;
+      const name = `${todayKey}-${(topic.title || "母婴IP选题").replace(/[\\/:*?"<>|]/g, "").slice(0, 36)}.md`;
+      const blob = new Blob([weeklyMarkdown(topic)], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = name;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function makeOutline() {
+      const topic = current.topic || "今天这个母婴话题";
+      const angle = current.angle || "真实经历";
+      const hook = current.hook.trim();
+      const middle = current.middle.trim();
+      const ending = current.ending.trim();
+
+      const templates = {
+        "避坑": [
+          `${hook || `关于${topic}，我今天想先说一个新手妈妈很容易踩的坑。`}`,
+          `我的观点是：${topic}不要先看别人买了什么，要先看自己家真实需不需要。`,
+          `${middle || `我当时就是因为怕漏掉，跟着清单买，后来才发现真正高频用到的只有几样。`}`,
+          `${ending || `所以这条先帮你把最容易多花钱的地方捋清楚，少买一点也没关系。`}`
+        ],
+        "省钱": [
+          `${hook || `${topic}想省钱，关键不是买便宜，而是别买错。`}`,
+          `我的观点是：先把使用场景想清楚，再决定要不要花这笔钱。`,
+          `${middle || `我自己试过之后发现，有些东西贵但省心，有些东西便宜却会反复闲置。`}`,
+          `${ending || `今天这条只讲我觉得最值得先判断的几个点，帮你少花冤枉钱。`}`
+        ],
+        "真实经历": [
+          `${hook || `这件${topic}的事，是我当妈妈后才真正明白的。`}`,
+          `我的观点是：别人的经验可以参考，但最后一定要回到你自己的节奏。`,
+          `${middle || `我一开始也很焦虑，照着别人做，后来才慢慢找到更适合自己的办法。`}`,
+          `${ending || `如果你也在这个阶段，先别急，我们把今天这一件事做好就够了。`}`
+        ],
+        "反常识": [
+          `${hook || `很多人聊${topic}会这么说，但我现在反而不这么看。`}`,
+          `我的观点是：真正影响结果的，常常不是最显眼的那件事。`,
+          `${middle || `我踩过之后才发现，前面纠结的点不一定重要，后面每天会用到的细节才重要。`}`,
+          `${ending || `所以今天换个角度讲，帮你少被表面信息带着跑。`}`
+        ],
+        "情绪共鸣": [
+          `${hook || `如果你最近因为${topic}很焦虑，先停一下。`}`,
+          `我的观点是：妈妈不是要一次做到完美，而是一天解决一个小问题。`,
+          `${middle || `我也有过一边查、一边怕、一边怀疑自己的时候，后来发现慢慢来更重要。`}`,
+          `${ending || `今天这条不催你变厉害，只陪你把眼前这一步走稳。`}`
+        ],
+        "个人成长": [
+          `${hook || `${topic}这件事，最后改变的其实不只是孩子。`}`,
+          `我的观点是：当妈妈以后，真正要练的是判断力和稳定感。`,
+          `${middle || `我从一开始什么都问别人，到后来能自己做选择，中间就是靠一次次复盘。`}`,
+          `${ending || `所以今天这条，既讲方法，也讲我自己怎么慢慢变稳。`}`
+        ],
+        "消费决策": [
+          `${hook || `${topic}到底要不要买，先别急着下单。`}`,
+          `我的观点是：消费决策要看使用频率、替代方案和你家的真实压力。`,
+          `${middle || `我会先看它是不是每天用、有没有平替、买了之后会不会增加照顾负担。`}`,
+          `${ending || `按这个顺序判断，比单纯看推荐更不容易后悔。`}`
+        ]
+      };
+
+      const picked = templates[angle] || templates["真实经历"];
+      [current.lineOpening, current.linePoint, current.lineStory, current.lineClose] = picked;
+      current.checks["已写四句话提纲"] = true;
+      pinnedStep = "outline";
+      save();
+    }
+
+    document.querySelectorAll("#shootingView .step-header").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("#shootingView .step").forEach((step) => step.classList.remove("active"));
+        button.closest(".step").classList.add("active");
+        pinnedStep = button.closest(".step").dataset.step;
+      });
+    });
+
+    document.querySelectorAll("[data-view-button]").forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.viewButton));
+    });
+
+    $("#editShootingTopic").addEventListener("click", () => {
+      fillShootingEditForm();
+      showShootingPanel("topicEditPanel");
+    });
+
+    $("#changeShootingTopic").addEventListener("click", () => {
+      showShootingPanel("topicChangePanel");
+      renderShootingChoices("weekly");
+    });
+
+    $("#clearShootingTopic").addEventListener("click", () => showShootingPanel("topicClearPanel"));
+    $("#saveShootingTopicEdit").addEventListener("click", saveShootingEdit);
+
+    $("#stashShootingTopic").addEventListener("click", () => {
+      const topic = currentToWeeklyTopic("暂存", "今日不想拍了");
+      $("#shootingTopicMessage").textContent = topic ? "当前内容已暂存到每周选题库。" : "当前还没有可暂存的内容。";
+      $("#shootingTopicMessage").classList.add("show");
+      save();
+    });
+
+    $("#stashThenClear").addEventListener("click", () => {
+      currentToWeeklyTopic("暂存", "清空今日拍摄卡前暂存");
+      resetCurrentDay();
+      showShootingPanel("");
+      $("#shootingTopicMessage").textContent = "已暂存到选题库，并清空今日拍摄卡。";
+      $("#shootingTopicMessage").classList.add("show");
+      save();
+    });
+
+    $("#clearDirectly").addEventListener("click", () => {
+      resetCurrentDay();
+      showShootingPanel("");
+      $("#shootingTopicMessage").textContent = "今日拍摄卡已清空，可以重新选择。";
+      $("#shootingTopicMessage").classList.add("show");
+      save();
+    });
+
+    $("#cancelClear").addEventListener("click", () => showShootingPanel(""));
+    $("#emptyFromWeekly").addEventListener("click", () => {
+      showShootingPanel("topicChangePanel");
+      changeMode = "丢弃并换新选题";
+      renderShootingChoices("weekly");
+      renderShootingTopicBox();
+    });
+    $("#emptyFromCapture").addEventListener("click", () => {
+      showShootingPanel("topicChangePanel");
+      changeMode = "丢弃并换新选题";
+      renderShootingChoices("capture");
+      renderShootingTopicBox();
+    });
+    $("#emptyManual").addEventListener("click", () => {
+      showShootingPanel("topicChangePanel");
+      changeMode = "丢弃并换新选题";
+      renderShootingChoices("manual");
+      renderShootingTopicBox();
+    });
+    $("#emptyFeeling").addEventListener("click", () => {
+      showShootingPanel("topicChangePanel");
+      changeMode = "丢弃并换新选题";
+      renderShootingChoices("feeling");
+      renderShootingTopicBox();
+    });
+    $("#showCaptureChoices").addEventListener("click", () => renderShootingChoices("capture"));
+    $("#showWeeklyChoices").addEventListener("click", () => renderShootingChoices("weekly"));
+    $("#showManualChoice").addEventListener("click", () => renderShootingChoices("manual"));
+    $("#showFeelingChoice").addEventListener("click", () => renderShootingChoices("feeling"));
+
+    $("#shootingChoiceList").addEventListener("click", (event) => {
+      const manual = event.target.closest("#useManualChoice");
+      if (manual) {
+        const title = $("#manualChoiceTitle").value.trim();
+        const point = $("#manualChoicePoint").value.trim();
+        applyShootingSelection({
+          title: title || "当下感受",
+          source: "手动新增",
+          expression: title,
+          corePoint: point,
+          topic: "",
+          angle: suggestAngle(point)
+        });
+        return;
+      }
+
+      const button = event.target.closest("button[data-choice-mode]");
+      if (!button) return;
+      const mode = button.dataset.choiceMode;
+      const index = Number(button.dataset.choiceIndex);
+      if (mode === "capture") {
+        const records = captureRecords().sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")).slice(0, 12);
+        const record = records[index];
+        if (!record) return;
+        applyShootingSelection({
+          title: record.topicText || record.point || "每日捕捉选题",
+          source: "每日捕捉卡",
+          expression: record.topicText || "",
+          corePoint: record.point || "",
+          note: record.source || "",
+          topic: columnToTopic[record.column] || "",
+          angle: suggestAngle(record.point || "")
+        });
+      }
+      if (mode === "weekly") {
+        const records = (state.weeklyTopics || []).filter((topic) => topic.status !== "放弃").slice(0, 12);
+        const topic = records[index];
+        if (!topic) return;
+        applyShootingSelection({
+          title: topic.title || "每周库选题",
+          source: "每周选题库",
+          expression: topic.inspiration || "",
+          corePoint: topic.point || "",
+          note: topic.scene || topic.conflict || "",
+          topic: columnToTopic[topic.column] || "",
+          angle: suggestAngle(topic.point || topic.conflict || ""),
+          weeklyTopicId: topic.id
+        });
+      }
+    });
+
+    fields.forEach((id) => {
+      document.getElementById(id).addEventListener("input", (event) => {
+        current[id] = event.target.value;
+        if (["lineOpening", "linePoint", "lineStory", "lineClose"].includes(id)) {
+          current.checks["已写四句话提纲"] = Boolean(
+            current.lineOpening.trim() || current.linePoint.trim() || current.lineStory.trim() || current.lineClose.trim()
+          );
+        }
+        save();
+      });
+    });
+
+    $("#structureDone").addEventListener("click", () => {
+      pinnedStep = "outline";
+      save();
+    });
+
+    $("#generateOutline").addEventListener("click", makeOutline);
+    $("#outlineDone").addEventListener("click", () => {
+      current.checks["已写四句话提纲"] = true;
+      pinnedStep = "shoot";
+      save();
+    });
+
+    captureFields.forEach((id) => {
+      document.getElementById(id).addEventListener("input", (event) => {
+        const map = {
+          captureTopic: "topicText",
+          captureSource: "source",
+          capturePoint: "point"
+        };
+        captureDraft[map[id]] = event.target.value;
+      });
+    });
+
+    $("#saveCapture").addEventListener("click", () => {
+      captureDraft.topicText = $("#captureTopic").value.trim();
+      captureDraft.source = $("#captureSource").value.trim();
+      captureDraft.point = $("#capturePoint").value.trim();
+      captureDraft.date = todayKey;
+      captureDraft.createdAt = captureDraft.createdAt || new Date().toISOString();
+      saveCaptureOnly();
+      const edited = Boolean(captureEditId);
+      clearCaptureForm(true);
+      $("#captureMessage").textContent = edited ? "修改已保存，可以继续记录下一个想法。" : "已保存，继续记录下一个想法。";
+      $("#captureMessage").classList.add("show");
+    });
+
+    $("#moveTodayCapture").addEventListener("click", () => moveCaptureToShooting(captureEditId || todayKey));
+
+    function handleCaptureAction(event) {
+      const button = event.target.closest("button[data-capture-action]");
+      if (!button) return;
+      const id = button.dataset.id;
+      const action = button.dataset.captureAction;
+      if (action === "move") {
+        moveCaptureToShooting(id);
+      }
+      if (action === "edit") {
+        const record = findCapture(id);
+        if (!record) return;
+        captureDraft = { ...record };
+        captureEditId = record.id;
+        switchView("capture");
+        renderCapture();
+        $("#captureTopic").focus();
+      }
+      if (action === "delete") {
+        if (!confirm("确定删除这条选题吗？")) return;
+        const record = findCapture(id);
+        state.captureItems = state.captureItems.filter((item) => item.id !== id);
+        if (record && state.captures[record.date] && state.captures[record.date].id === id) {
+          delete state.captures[record.date];
+        }
+        if (captureEditId === id) clearCaptureForm(false);
+        $("#captureMessage").textContent = "这条选题记录已删除。";
+        $("#captureMessage").classList.add("show");
+        save();
+      }
+    }
+
+    $("#captureHistoryList").addEventListener("click", handleCaptureAction);
+    $("#todayCaptureList").addEventListener("click", handleCaptureAction);
+
+    $("#saveWeeklyTopic").addEventListener("click", saveWeeklyFromForm);
+    $("#clearWeeklyForm").addEventListener("click", () => {
+      fillWeeklyForm(null);
+      $("#weeklyMessage").textContent = "表单已清空，可以继续加工下一条。";
+      $("#weeklyMessage").classList.add("show");
+    });
+
+    $("#weeklyView").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-weekly-action]");
+      if (!button) return;
+      const id = button.dataset.id;
+      const topic = state.weeklyTopics.find((item) => item.id === id);
+      if (!topic) return;
+      const action = button.dataset.weeklyAction;
+
+      if (action === "edit") {
+        fillWeeklyForm(topic);
+        $("#weeklyMessage").textContent = "已载入表单，可以继续加工这条选题。";
+        $("#weeklyMessage").classList.add("show");
+      }
+      if (action === "ready") {
+        topic.status = "可拍";
+        topic.updatedAt = new Date().toISOString();
+        save();
+      }
+      if (action === "week") {
+        topic.thisWeek = !topic.thisWeek;
+        if (topic.thisWeek && topic.status === "收集箱") topic.status = "可拍";
+        topic.updatedAt = new Date().toISOString();
+        save();
+      }
+      if (action === "move") {
+        moveWeeklyToShooting(id);
+      }
+      if (action === "shot") {
+        topic.status = "已拍";
+        topic.shot = true;
+        topic.thisWeek = false;
+        topic.updatedAt = new Date().toISOString();
+        save();
+      }
+      if (action === "abandon") {
+        topic.status = "放弃";
+        topic.thisWeek = false;
+        topic.updatedAt = new Date().toISOString();
+        save();
+      }
+      if (action === "markdown") {
+        exportWeeklyMarkdown(id);
+      }
+    });
+
+    $("#voiceButton").addEventListener("click", () => {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        $("#voiceHint").textContent = "当前浏览器不支持语音输入，请先打字记录。";
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = "zh-CN";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      $("#voiceHint").textContent = "正在听你说，讲完后会自动填进输入框。";
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        const input = $("#captureTopic");
+        input.value = input.value ? `${input.value}\n${text}` : text;
+        captureDraft.topicText = input.value;
+        $("#voiceHint").textContent = "语音已记录，可以继续补充或直接保存。";
+      };
+      recognition.onerror = () => {
+        $("#voiceHint").textContent = "语音没有记录成功，可以先打字记录。";
+      };
+      recognition.onend = () => {
+        if ($("#voiceHint").textContent === "正在听你说，讲完后会自动填进输入框。") {
+          $("#voiceHint").textContent = "语音已结束，没有识别到内容也没关系，可以先打字。";
+        }
+      };
+      recognition.start();
+    });
+
+    $("#exportJson").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `母婴IP今日拍摄卡-${todayKey}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    $("#importJson").addEventListener("click", () => $("#fileInput").click());
+    $("#fileInput").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const imported = JSON.parse(await file.text());
+        if (!imported.days) throw new Error("格式不正确");
+        imported.captures = imported.captures || {};
+        imported.captureItems = imported.captureItems || [];
+        imported.weeklyTopics = imported.weeklyTopics || [];
+        state = imported;
+        current = normalizeDay(state.days[todayKey] || makeDay());
+        migrateLegacyCaptures();
+        captureDraft = makeCapture();
+        captureEditId = "";
+        state.days[todayKey] = current;
+        pinnedStep = null;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        $("#backupHint").textContent = "导入成功。";
+        render();
+      } catch (error) {
+        $("#backupHint").textContent = "导入失败，请确认是之前导出的 JSON 文件。";
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
