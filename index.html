@@ -1537,13 +1537,18 @@
           <article class="topic-card">
             <h3>${mode === "feeling" ? "随便写一个当下感受" : "手动新建一个选题"}</h3>
             <div class="fields">
-              <label>标题或当下感受
+              <label>
+                <span class="inline-action">
+                  <span>标题或当下感受</span>
+                  <button class="small-button" type="button" id="voiceManualChoice">🎙 语音记录</button>
+                </span>
                 <textarea id="manualChoiceTitle" placeholder="先写下来，不用判断好不好。"></textarea>
               </label>
               <label>核心观点
                 <textarea id="manualChoicePoint" placeholder="我大概想表达什么。"></textarea>
               </label>
             </div>
+            <p class="hint" id="manualVoiceHint"></p>
             <button class="primary" type="button" id="useManualChoice">使用这个选题</button>
           </article>
         `;
@@ -1569,6 +1574,36 @@
         `;
         list.appendChild(item);
       });
+    }
+
+    function startVoiceInput(textareaSelector, hintSelector, afterText) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const hint = $(hintSelector);
+      if (!SpeechRecognition) {
+        hint.textContent = "当前浏览器不支持语音输入，请先打字记录。";
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = "zh-CN";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      hint.textContent = "正在听你说，讲完后会自动填进输入框。";
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        const input = $(textareaSelector);
+        input.value = input.value ? `${input.value}\n${text}` : text;
+        if (afterText) afterText(input.value);
+        hint.textContent = "语音已记录，可以继续补充或直接使用。";
+      };
+      recognition.onerror = () => {
+        hint.textContent = "语音没有记录成功，可以先打字记录。";
+      };
+      recognition.onend = () => {
+        if (hint.textContent === "正在听你说，讲完后会自动填进输入框。") {
+          hint.textContent = "语音已结束，没有识别到内容也没关系，可以先打字。";
+        }
+      };
+      recognition.start();
     }
 
     function renderSelect(select, items, selected) {
@@ -1997,6 +2032,12 @@ ${topic.inspiration || ""}
     $("#showFeelingChoice").addEventListener("click", () => renderShootingChoices("feeling"));
 
     $("#shootingChoiceList").addEventListener("click", (event) => {
+      const voice = event.target.closest("#voiceManualChoice");
+      if (voice) {
+        startVoiceInput("#manualChoiceTitle", "#manualVoiceHint");
+        return;
+      }
+
       const manual = event.target.closest("#useManualChoice");
       if (manual) {
         const title = $("#manualChoiceTitle").value.trim();
@@ -2184,32 +2225,9 @@ ${topic.inspiration || ""}
     });
 
     $("#voiceButton").addEventListener("click", () => {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        $("#voiceHint").textContent = "当前浏览器不支持语音输入，请先打字记录。";
-        return;
-      }
-      const recognition = new SpeechRecognition();
-      recognition.lang = "zh-CN";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      $("#voiceHint").textContent = "正在听你说，讲完后会自动填进输入框。";
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-        const input = $("#captureTopic");
-        input.value = input.value ? `${input.value}\n${text}` : text;
-        captureDraft.topicText = input.value;
-        $("#voiceHint").textContent = "语音已记录，可以继续补充或直接保存。";
-      };
-      recognition.onerror = () => {
-        $("#voiceHint").textContent = "语音没有记录成功，可以先打字记录。";
-      };
-      recognition.onend = () => {
-        if ($("#voiceHint").textContent === "正在听你说，讲完后会自动填进输入框。") {
-          $("#voiceHint").textContent = "语音已结束，没有识别到内容也没关系，可以先打字。";
-        }
-      };
-      recognition.start();
+      startVoiceInput("#captureTopic", "#voiceHint", (value) => {
+        captureDraft.topicText = value;
+      });
     });
 
     $("#exportJson").addEventListener("click", () => {
