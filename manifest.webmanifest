@@ -1,0 +1,15 @@
+{
+  "name": "母婴 IP 今日拍摄卡",
+  "short_name": "拍摄卡",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f3ea",
+  "theme_color": "#f7f3ea",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
